@@ -1,0 +1,44 @@
+#!/bin/bash
+# usage: bin/compile <build-dir> <cache-dir>
+
+set -e
+
+mkdir -p "$1" "$2"
+build=$(cd "$1/" && pwd)
+cache=$(cd "$2/" && pwd)
+ver=${GOVERSION:-1.1.2}
+file=${GOFILE:-go$ver.$(uname|tr A-Z a-z)-amd64.tar.gz}
+url=${GOURL:-https://go.googlecode.com/files/$file}
+
+if test -d $cache/go-$ver/go; then
+  echo "-----> Using Go $ver"
+else
+  rm -rf $cache/go-*
+  mkdir -p $cache/go-$ver
+
+  cd $cache/go-$ver
+  echo -n "-----> Installing Go $ver..."
+  curl -sO $url
+  tar -xzf $file
+  rm -f $file
+  echo " done"
+fi
+
+# Installs go in /tmp/go
+cp -Rp $cache/go-$ver/go /tmp
+
+export GOROOT=/tmp/go
+export PATH=$GOROOT/bin:$PATH
+
+unset GIT_DIR # interferes with `go get` somehow
+cd $build
+
+if test -x script/bootstrap; then
+  echo "-----> Bootstrapping by running script/bootstrap"
+  script/bootstrap
+fi
+
+if test -x script/build; then
+  echo "-----> Building by running script/build"
+  script/build
+fi
