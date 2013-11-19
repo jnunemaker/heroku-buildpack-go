@@ -6,9 +6,19 @@ set -e
 mkdir -p "$1" "$2"
 build=$(cd "$1/" && pwd)
 cache=$(cd "$2/" && pwd)
+buildpack=$(dirname $(dirname $0))
 ver=${GOVERSION:-1.1.2}
 file=${GOFILE:-go$ver.$(uname|tr A-Z a-z)-amd64.tar.gz}
 url=${GOURL:-https://go.googlecode.com/files/$file}
+
+# Python
+venv=$cache/venv
+mkdir -p $cache/pip
+python=python2.7
+PATH=$buildpack/$plat/bin:$venv/bin:$PATH
+virtualenv() {
+  python "$buildpack/vendor/virtualenv-1.7/virtualenv.py" "$@"
+}
 
 if test -d $cache/go-$ver/go; then
   echo "-----> Using Go $ver"
@@ -21,6 +31,17 @@ else
   curl -sO $url
   tar -xzf $file
   rm -f $file
+  echo " done"
+fi
+
+if ! (which hg >/dev/null); then
+  echo -n "-----> Installing Virtualenv..."
+  virtualenv --python $python --distribute --never-download --prompt='(venv) ' $venv > /dev/null 2>&1
+  . $venv/bin/activate > /dev/null 2>&1
+  echo " done"
+
+  echo -n "-----> Installing Mercurial..."
+  pip install mercurial > /dev/null 2>&1
   echo " done"
 fi
 
