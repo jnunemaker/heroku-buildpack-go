@@ -28,7 +28,7 @@ else
 
   cd $cache/go-$ver
   echo -n "-----> Installing Go $ver..."
-  curl -sO $url
+  curl -sLO $url
   tar -xzf $file
   rm -f $file
   echo " done"
