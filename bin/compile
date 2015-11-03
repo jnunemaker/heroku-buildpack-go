@@ -34,17 +34,6 @@ else
   echo " done"
 fi
 
-if ! (which hg >/dev/null); then
-  echo -n "-----> Installing Virtualenv..."
-  virtualenv --python $python --distribute --never-download --prompt='(venv) ' $venv > /dev/null 2>&1
-  . $venv/bin/activate > /dev/null 2>&1
-  echo " done"
-
-  echo -n "-----> Installing Mercurial..."
-  pip install mercurial > /dev/null 2>&1
-  echo " done"
-fi
-
 # Installs go in /tmp/go
 cp -Rp $cache/go-$ver/go /tmp
 
